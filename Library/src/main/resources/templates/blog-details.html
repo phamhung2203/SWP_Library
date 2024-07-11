@@ -1,0 +1,131 @@
+<div class="blog-main-area mb-70">
+	<div class="container">
+		<div class="row">
+			<div class="blog-main-wrapper">
+				<div class="single-blog-content">
+					<div class="single-blog-title">
+						<h3 th:text="${modelClass.get('blog').getTieuDe()}"></h3>
+						<div class="author-destils mb-30">
+							<div class="author-left">
+								<div class="author-description">
+									<p>Viết bởi: <strong th:text="${modelClass.get('blog').getTacGia().getTenUser()}"></strong></p>
+									<span th:text="${modelClass.get('blog').getNgayTao()}"></span>
+								</div>
+							</div>
+							<div class="author-right d-flex justify-content-center">
+								<div class="product-rating text-end">
+									<ul class="d-flex justify-content-center">
+										<li th:each="i : ${#numbers.sequence(1, 5)}" style="font-size: 16px;"
+											th:style="${i <= modelClass.get('blog').getDanhGia()} ? 'color:#f0ad4e;' : ''">
+											<i class="fa fa-star"></i>
+										</li>
+									</ul>
+									<p><strong th:text="${modelClass.get('blog').getSoLuotDanhGia()}"></strong> lượt đánh giá</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="blog-single-content">
+						<div th:utext="${modelClass.get('blog').getNoiDung()}"></div>
+					</div>
+				</div>
+				<div class="comment-tag">
+					<p>Tags: 
+						<strong th:each="tag, iterStat : ${modelClass.get('blog').getTags()}" th:text="${tag.getTenTag()} + (${iterStat.index} < ${modelClass.get('blog').getTags().size() - 1} ? ', ' : '')"></strong>
+					</p>
+				</div>
+				<div class="sharing-post mt-20">
+					<div class="share-text">
+						<span>Chia sẻ bài đăng này</span>
+					</div>
+					<div class="share-icon">
+						<ul>
+							<li><a href="#"><i class="fa fa-facebook"></i></a></li>
+							<li><a href="#"><i class="fa fa-twitter"></i></a></li>
+							<li><a href="#"><i class="fa fa-dribbble"></i></a></li>
+							<li><a href="#"><i class="fa fa-google-plus"></i></a></li>
+							<li><a href="#"><i class="fa fa-instagram"></i></a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="comment-title-wrap mt-30">
+					<h3 th:text="${modelClass.get('binhLuanBlogList').size() + ' Bình luận'}"></h3>
+				</div>
+				<div class="comment-reply-wrap mt-50">
+					<ul>
+						<li th:each="comment : ${modelClass.get('binhLuanBlogList')}">
+							<div class="public-comment">
+								<div class="public-text">
+									<div class="single-comm-top">
+										<a href="#" th:text="${comment.getUser().getTenUser()}"></a>
+										<p th:text="${comment.getNgayTao()}"></p>
+									</div>
+									<p th:text="${comment.getNoiDung()}"></p>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+				<div class="comment-title-wrap mt-30">
+					<h3>Bình luận của bạn</h3>
+				</div>
+				<div class="comment-input mt-40">
+					<div class="comment-input-textarea mb-30">
+						<div class="review-field-ratings">
+							<span>Đánh giá</span>
+							<div class="single-control">
+								<div class="review-control-vote">
+									<input type="radio" id="star5" name="rating" value="5">
+									<label for="star5" title="5 sao"><i class="fa fa-star"></i></label>
+									<input type="radio" id="star4" name="rating" value="4">
+									<label for="star4" title="4 sao"><i class="fa fa-star"></i></label>
+									<input type="radio" id="star3" name="rating" value="3">
+									<label for="star3" title="3 sao"><i class="fa fa-star"></i></label>
+									<input type="radio" id="star2" name="rating" value="2">
+									<label for="star2" title="2 sao"><i class="fa fa-star"></i></label>
+									<input type="radio" id="star1" name="rating" value="1">
+									<label for="star1" title="1 sao"><i class="fa fa-star"></i></label>
+								</div>
+							</div>
+						</div>
+						<form action="#" th:if="${isAuthenticated==1}">
+							<textarea name="massage" cols="30" rows="10" placeholder="Viết bình luận của bạn tại đây"></textarea>
+							<div class="single-post-button">
+								<button type="submit">Đăng bình luận</button>
+							</div>
+						</form>
+						<div th:if="${isAuthenticated==0}">
+							<p>Bạn chưa đăng nhập. Hãy <a href="/Library/login">đăng nhập</a>
+								để có thể đưa ra đánh giá và bình luận của bạn.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$('#comment-area').on('submit', function (e) {
+		e.preventDefault();
+		let rating = $('input[name="rating"]:checked').val();
+		let data = {
+			postId: $('#book').val(),
+			danhGia: rating,
+			noiDung: $('#newComment').val()
+		};
+		$.ajax({
+			url: '/Library/book/comment',
+			method: 'POST',
+			data: JSON.stringify(data),
+			contentType: 'application/json',
+			success: function () {
+				alert("Đã đăng bình luận");
+				window.location.reload();
+			},
+			error: function () {
+				alert("Có lỗi");
+			}
+		});
+	});
+</script>

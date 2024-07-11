@@ -1,0 +1,282 @@
+<!-- shop-main-area-start -->
+<div class="shop-main-area mb-70">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-12 order-lg-1 order-2 mt-sm-50 mt-xs-40">
+                <div class="section-title-5 mb-30">
+                    <h2>Bộ tìm kiếm</h2>
+                </div>
+                <div class="header-search mb-4">
+                    <form action="/Library/book">
+                        <input id="searchString" type="text" placeholder="Tìm kiếm sách..."
+                               name="search" th:value="${modelClass.get('searchString')}" />
+                        <button type="submit"><i class="fa fa-search"></i></button>
+                    </form>
+                </div>
+                <form class="shop-left" id="filterForm" action="/Library/book">
+                    <input type="hidden" name="theLoai" th:value="${modelClass.get('chosenTheLoaiId')}" />
+                    <input type="hidden" name="page" th:value="${modelClass.get('pageNumberParam')}" />
+                    <div class="left-title mb-20">
+                        <h4>Danh mục</h4>
+                    </div>
+                    <div class="left-menu mb-30">
+                        <ul>
+                            <li><a class="has-arrow" href="/Library/book">Tất cả</a></li>
+                            <li th:each="danhMuc : ${modelClass.get('danhMucList')}">
+                                <a class="has-arrow" data-bs-toggle="collapse" th:text="${danhMuc.getTenDanhMuc()}"
+                                   th:attr="data-bs-target='#theLoaiList_' + ${danhMuc.getId()}"></a>
+                                <ul th:id="'theLoaiList_' + ${danhMuc.getId()}" class="collapse theLoaiList">
+                                    <li th:each="theLoai : ${danhMuc.getTheLoaiList()}">
+                                        <a th:if="${modelClass.get('chosenTheLoaiId')==theLoai.getId()}"
+                                           th:href="@{/book(theLoai=${theLoai.getId()})}"
+                                           th:text="${theLoai.getTenTheLoai()}" style="color: #f07c29"
+                                        ></a>
+                                        <a th:unless="${modelClass.get('chosenTheLoaiId')==theLoai.getId()}"
+                                           th:href="@{/book(theLoai=${theLoai.getId()})}"
+                                           th:text="${theLoai.getTenTheLoai()}"
+                                        ></a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="left-title mb-20">
+                        <h4>Tác giả</h4>
+                    </div>
+                    <div class="left-menu mb-30">
+                        <ul>
+                            <li th:each="tacGia : ${modelClass.get('tacGiaList')}">
+                                <input th:if="${modelClass.get('chosenTacGiaList')!=null &&
+                                                modelClass.get('chosenTacGiaList').contains(tacGia)}"
+                                       type="checkbox" name="tacGia" th:value="${tacGia}" th:id="${tacGia}" checked/>
+                                <input th:unless="${modelClass.get('chosenTacGiaList')!=null &&
+                                                    modelClass.get('chosenTacGiaList').contains(tacGia)}"
+                                       type="checkbox" name="tacGia" th:value="${tacGia}" th:id="${tacGia}"/>
+                                <label th:for="${tacGia}" th:text="${tacGia}"></label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="left-title mb-20">
+                        <h4>Nhà xuất bản</h4>
+                    </div>
+                    <div class="left-menu mb-30">
+                        <ul>
+                            <li th:each="nxb : ${modelClass.get('nhaXuatBanList')}">
+                                <input th:if="${modelClass.get('chosenNhaXuatBanList')!=null &&
+                                                modelClass.get('chosenNhaXuatBanList').contains(nxb)}"
+                                       type="checkbox" name="nhaXuatBan" th:value="${nxb}" th:id="${nxb}" checked/>
+                                <input th:unless="${modelClass.get('chosenNhaXuatBanList')!=null &&
+                                                    modelClass.get('chosenNhaXuatBanList').contains(nxb)}"
+                                       type="checkbox" name="nhaXuatBan" th:value="${nxb}" th:id="${nxb}"/>
+                                <label th:for="${nxb}" th:text="${nxb}"></label>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-9 col-md-12 col-12 order-lg-2 order-1">
+                <div class="category-image mb-30">
+                    <a href="#"><img src="img/banner/32.jpg" alt="banner" /></a>
+                </div>
+                <div class="section-title-5 mb-30">
+                    <h2>Sách</h2>
+                </div>
+                <div class="toolbar mb-30">
+                    <div class="shop-tab">
+                        <div class="tab-3">
+                            <ul class="nav">
+                                <li><a class="active" href="#th" data-bs-toggle="tab"><i class="fa fa-th-large"></i>Grid</a></li>
+                                <li><a href="#list" data-bs-toggle="tab"><i class="fa fa-bars"></i>List</a></li>
+                            </ul>
+                        </div>
+                        <div class="list-page"></div>
+                    </div>
+                </div>
+                <!-- tab-area-start -->
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="th">
+                        <div class="row">
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6" th:each="sach : ${modelClass.get('sachList')}">
+                                <div class="product-wrapper mb-40">
+                                    <div class="product-img">
+                                        <a th:href="@{/book(book=${sach.getId()})}">
+                                            <img th:id="'imagePath_' + ${sach.getId()}"
+                                                 th:src="${sach.getLinkAnh()}" alt="book" class="primary" />
+                                        </a>
+                                        <div class="quick-view">
+                                            <a class="action-view" th:href="@{/book(book=${sach.getId()})}" title="Xem chi tiết">
+                                                <i class="fa fa-search-plus"></i>
+                                            </a>
+                                        </div>
+                                        <div class="product-flag">
+<!--                                            <ul>-->
+<!--                                                <li><span class="sale">new</span></li>-->
+<!--                                                <li><span class="discount-percentage">-5%</span></li>-->
+<!--                                            </ul>-->
+                                        </div>
+                                    </div>
+                                    <div class="product-details mb-3 text-center">
+                                        <div class="product-rating">
+                                            <ul>
+                                                <li th:each="i : ${#numbers.sequence(1, 5)}">
+                                                    <a href="#">
+                                                        <i th:class="${i <= sach.getDanhGia() ? 'fa fa-star' : 'fa fa-star-o'}"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <h4><a th:id="'bookName_' + ${sach.getId()}"
+                                               th:href="@{/book(book=${sach.getId()})}"
+                                               th:text="${sach.getTenSach()}"></a></h4>
+                                        <div class="product-price">
+                                            <ul>
+                                                <li th:text="${sach.getTacGia()}"></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="product-link">
+                                        <div class="product-button">
+                                            <button class="dangKyButton" th:if="${isAuthenticated==1}" title="Đăng ký mượn"
+                                                    th:onclick="'addToCart(' + ${sach.getId()} + ')'">
+                                                <i class="fa fa-shopping-cart"></i> Đăng ký mượn
+                                            </button>
+                                            <a th:unless="${isAuthenticated==1}" href="/Library/login">
+                                                <i class="fa fa-shopping-cart"></i> Đăng ký mượn
+                                            </a>
+                                        </div>
+                                        <div class="add-to-link">
+                                            <ul>
+                                                <li>
+                                                    <a th:href="@{/book(book=${sach.getId()})}" title="Xem chi tiết">
+                                                        <i class="fa fa-external-link"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="hide" th:id="'quantityInStock_' + ${sach.getId()}"
+                                         th:attr="data-quantityInStock=${sach.getSoLuongTrongKho()}"></div>
+                                    <div class="hide" th:id="'price_' + ${sach.getId()}"
+                                         th:attr="data-price=${sach.getGiaTien()}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="list">
+                        <!-- single-shop-start -->
+                        <div class="single-shop mb-30" th:each="sach : ${modelClass.get('sachList')}">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-12">
+                                    <div class="product-wrapper-2">
+                                        <div class="product-img">
+                                            <a th:href="@{/book(book=${sach.getId()})}">
+                                                <img th:id="'imagePath_' + ${sach.getId()}"
+                                                     th:src="${sach.getLinkAnh()}" alt="book" class="primary" />
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-8 col-md-8 col-12">
+                                    <div class="product-wrapper-content">
+                                        <div class="product-details">
+                                            <div class="product-rating">
+                                                <ul>
+                                                    <li th:each="i : ${#numbers.sequence(1, 5)}">
+                                                        <a href="#">
+                                                            <i th:class="${i <= sach.getDanhGia() ? 'fa fa-star' : 'fa fa-star-o'}"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <h4><a th:id="'bookName_' + ${sach.getId()}"
+                                                   th:href="@{/book(book=${sach.getId()})}"
+                                                   th:text="${sach.getTenSach()}"></a></h4>
+                                            <div class="product-price">
+                                                <ul>
+                                                    <li th:text="${sach.getTacGia()}"></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="product-link">
+                                            <div class="product-button">
+                                                <button class="dangKyButton" th:if="${isAuthenticated==1}" title="Đăng ký mượn"
+                                                        th:onclick="'addToCart(' + ${sach.getId()} + ')'">
+                                                    <i class="fa fa-shopping-cart"></i> Đăng ký mượn
+                                                </button>
+                                                <a th:unless="${isAuthenticated==1}" href="/Library/login">
+                                                    <i class="fa fa-shopping-cart"></i> Đăng ký mượn
+                                                </a>
+                                            </div>
+                                            <div class="add-to-link">
+                                                <ul>
+                                                    <li>
+                                                        <a th:href="@{/book(book=${sach.getId()})}" title="Xem chi tiết">
+                                                            <i class="fa fa-external-link"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- single-shop-end -->
+                    </div>
+                </div>
+                <!-- tab-area-end -->
+                <!-- pagination-area-start -->
+                <div class="pagination-area mt-50">
+                    <div class="list-page-2">
+                        <p th:text="'Hiển thị từ ' + ${modelClass['startItem']} + ' đến ' + ${modelClass['endItem']} + ' của ' + ${modelClass['totalItems']} + ' kết quả'"></p>
+                    </div>
+                    <div class="page-number">
+                        <ul>
+                            <li th:if="${modelClass['currentPage']} > 0">
+                                <a th:href="@{/book(page=${modelClass['currentPage'] + 1} - 1,
+                                                    search=${modelClass.get('searchString')},
+                                                    theLoai=${modelClass.get('chosenTheLoaiId')},
+                                                    tacGia=${modelClass.get('chosenTacGiaList')},
+                                                    nhaXuatBan=${modelClass.get('chosenNhaXuatBanList')}
+                                                    )}"
+                                ><i class="fa fa-angle-left"></i></a>
+                            </li>
+                            <li th:each="pageNum : ${modelClass['pageNumbers']}">
+                                <a th:if="${pageNum} == -1" class="disabled">...</a>
+                                <a th:if="${pageNum} != -1"
+                                   th:href="@{/book(page=${pageNum + 1},
+                                                    search=${modelClass.get('searchString')},
+                                                    theLoai=${modelClass.get('chosenTheLoaiId')},
+                                                    tacGia=${modelClass.get('chosenTacGiaList')},
+                                                    nhaXuatBan=${modelClass.get('chosenNhaXuatBanList')}
+                                                    )}"
+                                   th:classappend="${pageNum} == ${modelClass['currentPage']} ? 'active' : ''"
+                                   th:text="${pageNum + 1}"></a>
+                            </li>
+                            <li th:if="${modelClass['currentPage']} < ${modelClass['totalPages']} - 1">
+                                <a th:href="@{/book(page=${modelClass['currentPage'] + 1} + 1,
+                                                    search=${modelClass.get('searchString')},
+                                                    theLoai=${modelClass.get('chosenTheLoaiId')},
+                                                    tacGia=${modelClass.get('chosenTacGiaList')},
+                                                    nhaXuatBan=${modelClass.get('chosenNhaXuatBanList')}
+                                                    )}"
+                                ><i class="fa fa-angle-right"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- pagination-area-end -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- shop-main-area-end -->
+<!-- Modal end -->
+<script src="js/pages/book.js"></script>
+<script>
+    function addToCart(id) {
+        updateCart(id, 'ADD');
+    }
+</script>
+
+<!-- Mirrored from htmldemo.net/koparion/koparion/shop.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 23 Feb 2024 17:30:52 GMT -->

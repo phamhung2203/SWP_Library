@@ -1,0 +1,425 @@
+
+<style>
+    .btn-custom {
+        background-color: #f07c29; /* Mã màu cam tùy chỉnh */
+        color: white;
+    }
+
+      img {
+         width: 100px;
+         height: auto;
+          display: block;
+         margin: 0 auto;
+}
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #007bff;
+
+        color: black;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: black;
+    }
+
+    .select2-container .select2-selection--multiple {
+        height: auto !important;
+    }
+
+    .select2-container .select2-selection--multiple .select2-search__field {
+        width: 100% !important;
+    }
+
+    .select2-dropdown {
+        z-index: 9999;
+    }
+
+</style>
+
+<div id="content-wrapper">
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb d-flex justify-content-between align-items-center">
+            <li class="breadcrumb-item active">Bảng thông tin</li>
+            <div class="text-right">
+                <a href="#addBookModal" class="btn btn-custom" data-toggle="modal"><span>Thêm </span><i class="fa fa-plus"></i></a>
+            </div>
+        </ol>
+        <!-- Search Form -->
+        <form action="/Library/management/book" id="searchForm">
+            <div class="form-row align-items-end">
+                <div class="form-group col-md-6">
+                    <label for="searchCategory">Tìm kiếm theo danh mục:</label>
+                    <select id="searchCategory" name="category" class="form-control">
+                        <option value="">Tất cả danh mục</option>
+                        <option th:each="category : ${modelClass.get('categories')}" th:text="${category.getTenDanhMuc()}"
+                                th:selected="${category.getId()==modelClass.get('chosenDanhMuc')}" th:value="${category.getId()}"></option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6" id="genreContainer">
+                    <label for="searchGenre">Tìm kiếm theo thể loại:</label>
+                    <select id="searchGenre" name="genre" class="form-control">
+                        <option value="">Tất cả thể loại</option>
+                        <option th:each="genre : ${modelClass.get('genres')}" th:text="${genre.getTenTheLoai()}"
+                                th:selected="${genre.getId()==modelClass.get('chosenTheLoai')}" th:value="${genre.getId()}"></option>
+                    </select>
+                </div>
+            </div>
+        </form>
+        <!-- DataTables Example -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fas fa-table"></i>
+                Bảng thông tin sách</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Tên sách</th>
+                            <th>Ảnh</th>
+                            <th>Tác giả</th>
+                            <th>Giá tiền</th>
+                            <th>Số lượng</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${modelClass.get('sachList')}">
+                            <td th:id="'tenSach_' + ${item.getId()}" th:text="${item.getTenSach()}"></td>
+                            <td > <img th:id="'anh_' + ${item.getId()}" th:src="@{'../' + ${item.getLinkAnh()}}"/></td>
+                            <td th:id="'tacGia_' + ${item.getId()}" th:text="${item.getTacGia()}"></td>
+                            <td th:id="'giaTien_' + ${item.getId()}" th:text="${item.getGiaTien()}"></td>
+                            <td th:id="'soLuong_' + ${item.getId()}" th:text="${item.getSoLuongTrongKho()}"></td>
+                            <td class="text-center">
+                                <div th:if="${item.getFlagDel()==0}" class="badge badge-success">Hiển thị</div>
+                                <div th:if="${item.getFlagDel()==1}" class="badge badge-danger">Bị ẩn</div>
+                            </td>
+                            <div style="display: none" th:id="'moTa_' + ${item.getId()}"
+                                 th:attr="data-moTa=${item.getMoTa()}"></div>
+                            <div style="display: none" th:id="'danhGia_' + ${item.getId()}"
+                                 th:attr="data-danhGia=${item.getDanhGia()}"></div>
+                            <div style="display: none" th:id="'nhaXuatBan_' + ${item.getId()}"
+                                 th:attr="data-nhaXuatBan=${item.getNhaXuatBan()}"></div>
+                            <div style="display: none" th:id="'theLoai_' + ${item.getId()}"
+                                 th:attr="data-theLoai=${item.getTheLoaiList()}"></div>
+                            <div style="display: none" th:id="'ngayTao_' + ${item.getId()}"
+                                 th:attr="data-ngayTao=${item.getDateCreated()}"></div>
+                            <div style="display: none" th:id="'ngayCapNhat_' + ${item.getId()}"
+                                 th:attr="data-ngayCapNhat=${item.getDateUpdated()}"></div>
+                            <td class="d-flex justify-content-center">
+                                <button type="button" class="btn btn-light"
+                                        th:onclick="'openModalViewBookDetail(' + ${item.getId()} + ')'">
+                                    <i class="fa fa-eye text-primary"></i>
+                                </button>
+                                <button type="button" class="btn btn-light"
+                                        th:onclick="'openModalUpdateBook(' + ${item.getId()} + ')'">
+                                    <i class="fa fa-pen text-primary"></i>
+                                </button>
+                                <button th:if="${item.getFlagDel()==0}" type="button" class="btn btn-light"
+                                        th:onclick="'openModalDeactivateBook(' + ${item.getId()} + ')'">
+                                    <i class="fa fa-times text-primary"></i>
+                                </button>
+                                <button th:if="${item.getFlagDel()==1}" type="button" class="btn btn-light"
+                                        th:onclick="'openModalActivateBook(' + ${item.getId()} + ')'">
+                                    <i class="fa fa-check text-primary"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer small text-muted">Cập nhật mới nhất lúc <span id="time-update"></span></div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /.content-wrapper -->
+
+<!-- Add Modal-->
+<div id="addBookModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="add-book-form">
+                <div class="modal-header">
+                    <h4 class="modal-title">Thêm sách</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Ảnh</label>
+                        <input id="anh-add" type="text" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Tên sách</label>
+                        <input id="tenSach-add" type="text" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Tác giả</label>
+                        <input id="tacGia-add" type="text" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Thể loại</label>
+                        <select id="theLoai-add" class="form-control select2" multiple="multiple" required>
+                            <option th:each="genre : ${modelClass.get('genresAddUpdate')}" th:value="${genre.getId()}"
+                                    th:text="${genre.getTenTheLoai()}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá tiền</label>
+                        <input id="giaTien-add" type="text" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng</label>
+                        <input id="soLuong-add" type="text" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Nhà xuất bản</label>
+                        <input id="nhaXuatBan-add" type="text" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <input id="moTa-add" type="text" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Hủy">
+                    <input type="submit" class="btn btn-success" value="Thêm">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal-->
+<div id="updateBookModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="update-book-form">
+                <div class="modal-header">
+                    <h4 class="modal-title">Cập nhật sách</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Ảnh</label>
+                        <img id="anh-update" class="book-image"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên sách</label>
+                        <input id="tenSach-update" type="text" class="form-control"  />
+                    </div>
+                    <div class="form-group">
+                        <label>Tác giả</label>
+                        <input id="tacGia-update" type="text" class="form-control"  />
+                    </div>
+                    <div class="form-group">
+                        <label>Thể loại</label>
+                        <select id="theLoai-update" class="form-control select2" multiple="multiple" required>
+                            <option th:each="genre : ${modelClass.get('genresAddUpdate')}"
+                                    th:value="${genre.getId()}" th:text="${genre.getTenTheLoai()}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá tiền</label>
+                        <input id="giaTien-update" type="text" class="form-control"  />
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng</label>
+                        <input id="soLuong-update" type="text" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nhà xuất bản</label>
+                        <input id="nhaXuatBan-update" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <input id="moTa-update" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Đánh giá</label>
+                        <input id="danhGia-update" type="text" class="form-control" />
+                    </div>
+                </div>
+                <input id="book-id-update" type="hidden" style="display: none;"/>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Hủy">
+                    <input type="submit" class="btn btn-success" value="Cập nhật">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal-->
+<div id="detailBookModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header">
+                    <h4 class="modal-title">Thông tin sách</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Ảnh</label>
+                        <img id="anh-detail" class="book-image"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên sách</label>
+                        <b id="tenSach-detail" type="text" class="form-control" ></b>
+                    </div>
+                    <div class="form-group">
+                        <label>Tác giả</label>
+                        <b id="tacGia-detail" type="text" class="form-control" ></b>
+                    </div>
+                    <div class="form-group">
+                        <label>Thể loại</label>
+                        <b id="theLoai-detail" type="text" class="form-control" ></b>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá tiền</label>
+                        <b id="giaTien-detail" type="text" class="form-control"></b>
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng</label>
+                        <b id="soLuong-detail" type="text" class="form-control"></b>
+                    </div>
+                    <div class="form-group">
+                        <label>Nhà xuất bản</label>
+                        <b id="nhaXuatBan-detail" type="text" class="form-control"></b>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <b id="moTa-detail" type="text" class="form-control"></b>
+                    </div>
+                    <div class="form-group">
+                        <label>Đánh giá</label>
+                        <b id="danhGia-detail" type="text" class="form-control"></b>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- deactivate Modal-->
+<div id="deactivateBookModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="deactivate-book-form">
+                <div class="modal-header">
+                    <h4 class="modal-title"> Ẩn sách</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">Bạn có chắc muốn ẩn thông tin sách này?</p>
+                    <input id="deactivate-book-id" style="display: none;"/>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Hủy" />
+                    <input type="submit" class="btn btn-danger" value="Ẩn" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- activate Modal-->
+<div id="activateBookModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="activate-book-form">
+                <div class="modal-header">
+                    <h4 class="modal-title"> Hiển thị thông tin sách</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc muốn hiển thị thông tin sách này?</p>
+                    <input id="activate-book-id" style="display: none;"/>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Hủy" />
+                    <input type="submit" class="btn btn-custom" value="Hiển thị" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="../static-admin_and_staff/js/pages/manage-book.js"></script>
+<script src="../select2/dist/js/select2.min.js"></script>
+<script th:inline="javascript">
+    function openModalDeactivateBook(id) {
+        $('#deactivate-book-id').val(id);
+        $('#deactivateBookModal').modal('show');
+    }
+
+    function openModalActivateBook(id) {
+        $('#activate-book-id').val(id);
+        $('#activateBookModal').modal('show');
+    }
+
+    function openModalUpdateBook(id) {
+        let tenSach = document.getElementById('tenSach_' + id).innerText;
+        let anh = document.getElementById('anh_' + id).getAttribute('src');
+        let tacGia = document.getElementById('tacGia_' + id).innerText;
+        let giaTien = document.getElementById('giaTien_' + id).innerText;
+        let soLuong = document.getElementById('soLuong_' + id).innerText;
+        let moTa = document.getElementById('moTa_' + id).getAttribute('data-moTa');
+        let nhaXuatBan = document.getElementById('nhaXuatBan_' + id).getAttribute('data-nhaXuatBan');
+        let danhGia = document.getElementById('danhGia_' + id).getAttribute('data-danhGia');
+        let theLoai = document.getElementById('theLoai_' + id).getAttribute('data-theLoai');
+        $('#tenSach-update').val(tenSach);
+        $('#anh-update').attr('src', anh);
+        $('#tacGia-update').val(tacGia);
+        $('#giaTien-update').val(giaTien);
+        $('#soLuong-update').val(soLuong);
+        $('#book-id-update').val(id);
+        $('#moTa-update').val(moTa);
+        $('#nhaXuatBan-update').val(nhaXuatBan);
+        $('#danhGia-update').val(danhGia);
+        $('#theLoai-update').val(theLoai);
+       
+        $('#updateBookModal').modal('show');
+    }
+
+    function openModalViewBookDetail(id) {
+        let tenSach = document.getElementById('tenSach_' + id).innerText;
+        let anh = document.getElementById('anh_' + id).getAttribute('src');
+        let tacGia = document.getElementById('tacGia_' + id).innerText;
+        let giaTien = document.getElementById('giaTien_' + id).innerText;
+        let soLuong = document.getElementById('soLuong_' + id).innerText;
+        let moTa = document.getElementById('moTa_' + id).getAttribute('data-moTa');
+        let nhaXuatBan = document.getElementById('nhaXuatBan_' + id).getAttribute('data-nhaXuatBan');
+        let danhGia = document.getElementById('danhGia_' + id).getAttribute('data-danhGia');
+        let theLoai = document.getElementById('theLoai_' + id).getAttribute('data-theLoai');
+        $('#tenSach-detail').text(tenSach);
+        $('#anh-detail').attr('src', anh);
+        $('#tacGia-detail').text(tacGia);
+        $('#giaTien-detail').text(giaTien);
+        $('#soLuong-detail').text(soLuong);
+        $('#theLoai-detail').text(theLoai);
+        $('#moTa-detail').text(moTa);
+        $('#nhaXuatBan-detail').text(nhaXuatBan);
+        $('#danhGia-detail').text(danhGia);
+        $('#detailBookModal').modal('show');
+    }
+</script>
+<script>
+    $('#searchCategory').select2();
+    $('#searchGenre').select2();
+    $('#theLoai-add').select2({
+        dropdownParent: $('#addBookModal'),
+        allowClear: true,
+        width: '100%'
+    });
+    $('#theLoai-update').select2({
+        dropdownParent: $('#updateBookModal'),
+        allowClear: true,
+        width: '100%'
+    });
+</script>
